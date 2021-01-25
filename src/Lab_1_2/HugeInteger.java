@@ -122,7 +122,7 @@ public class HugeInteger {
 		}
 		return sum;
 	}
-	public void sub(HugeInteger h) {
+	public HugeInteger subtract(HugeInteger h) {
 		int x = 0;													//find the length of the sum array
 		int y = 0;
 		if(this.num_len == h.num_len) {								//if the numbers have the same number of digits
@@ -154,6 +154,45 @@ public class HugeInteger {
 				}
 			}
 		}
+		else {
+			int []temp1 = {0};											//initiate the dummy array
+			int []temp2 = {0};											//initiate another dummy array
+			if(y == 0) {									        //this number is the same digit as h
+				for(int i=1; i<this.num_len; i++) {
+					if(this.digit_list[0] > h.digit_list[0]) {		//the absolute of this number is greater h
+						diff.digit_list[0]= this.digit_list[0];
+						temp1 = this.digit_list;
+						temp2 = h.digit_list;
+					}
+					else {											//the absolute of h is greater than this number
+						diff.digit_list[0]= h.digit_list[0];
+						temp1 = h.digit_list;
+						temp2 = this.digit_list;
+					}
+				}
+			}
+			else if (y==1 ) {										//this number is greater than h in length
+				diff.digit_list[0] = this.digit_list[0];
+				temp1 = this.digit_list;
+				temp2 = h.digit_list;
+			}
+			else {													//this number is smaller than h in length
+				diff.digit_list[0] = h.digit_list[0];
+				temp1 = h.digit_list;
+				temp2 = this.digit_list;
+			}
+			for(int i = x; i>1 ; i--) {
+				z = temp1[i] - temp2[i] - w;						//subtract two values at the same digit level and subtract the borrow 
+				if (z>=0) {											//if the value is positive
+					diff.digit_list[i] = z;
+				}
+				else {												//if the value is negative
+					diff.digit_list[i] = z + 10;
+					w = 1;
+				}
+			}
+		}
+		return diff;
 	}
 }
 

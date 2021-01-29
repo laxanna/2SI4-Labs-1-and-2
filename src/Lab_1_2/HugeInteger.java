@@ -5,6 +5,7 @@ public class HugeInteger {
 	
 	public HugeInteger(int n) {
 		//find if the integer is positive or negative
+		
 		if(n>=0) {										//if it is positive
 			this.digit_list[0] = 0;
 		}
@@ -33,6 +34,7 @@ public class HugeInteger {
 	
 	public HugeInteger(String val) {
 		String array[] = val.split("");					//Split the string into array of strings
+		this.digit_list = new int [val.length()];
 		int x;											//find if the integer is positive or nevative 
 		if (array[0]=="-") {							//if it is negative
 			this.digit_list[0]=1;
@@ -194,5 +196,63 @@ public class HugeInteger {
 		}
 		return diff;
 	}
+	
+	public int compareTo(HugeInteger h){
+		if(this.digit_list[0] > h.digit_list[0]) {
+			return -1;
+		}
+		else if(this.digit_list[0] < h.digit_list[0]) {
+			return 1;
+		}
+		else if(this.digit_list[0]==0) {
+			if(this.num_len > h.num_len) {
+				return 1;
+			}
+			else if(this.num_len < h.num_len) {
+				return -1;
+			}
+			else {
+				for (int i = 1; i<this.num_len; i++) {
+					if(this.digit_list[i] > h.digit_list[i]) {
+						return 1;
+					}
+					if(this.digit_list[i] < h.digit_list[i]) {
+						return -1;
+					}
+				}
+				return 0;
+			}
+		}
+		else {
+			if(this.num_len > h.num_len) {
+				return -1;
+			}
+			else if(this.num_len < h.num_len) {
+				return 1;
+			}
+			else {
+				for (int i = 1; i<this.num_len; i++) {
+					if(this.digit_list[i] > h.digit_list[i]) {
+						return -1;
+					}
+					if(this.digit_list[i] < h.digit_list[i]) {
+						return 1;
+					}
+				}
+				return 0;
+			}
+		}
+	}
+	
+	public String toString(){
+		String output = new String(); 
+		if (this.digit_list[0] == 1){
+		    output = "-";
+		}
+        for (int i=1; i<this.num_len+1; i++) {
+        	output= output + this.digit_list[i];
+        }
+		return output;
+	}    
 }
 

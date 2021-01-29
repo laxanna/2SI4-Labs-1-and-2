@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.mycompany.lab1_21;
+package Lab_1_2;
 import java.math.BigInteger; 
 import java.util.Random;
 

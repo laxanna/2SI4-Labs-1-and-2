@@ -1,258 +1,288 @@
 package Lab_1_2;
+
+import java.util.Arrays;
+//import the functions from Arrays library
+
 public class HugeInteger {
-	private int [] digit_list;
-	private int num_len;
+	private int [] intArr;
+	private boolean value_sign;
 	
-	public HugeInteger(int n) {
-		//find if the integer is positive or negative
-		
-		if(n>=0) {										//if it is positive
-			this.digit_list[0] = 0;
+	public HugeInteger(int n) throws ArithmeticException {
+		if(n>0) {
+			this.intArr = new int [n];
+			
+			//find if the integer is positive or value_sign
+			this.value_sign = Math.random() <0.5;
+			
+			//leading entry
+			double x = Math.random();
+			while(x==1 || x == 0) {
+				x = Math.random();
+			}
+			this.intArr[n-1] = (int) (x*10);
+			
+			//generate the digit list
+			for(int i=0; i<n-1; i++) {
+				double y = Math.random();
+				while (y==1) {
+					y = Math.random();
+				}
+				this.intArr[i]= (int) (y*10);
+			}
 		}
-		else {											//if it is negative
-			this.digit_list[0] = 1;
-			n= -n;
+		else if(n>1000) {
+			throw new ArithmeticException ("Value too large");
 		}
-		
-		int n_copy = n, y = 1;							//find the largest 10^x that can be divide by the number
-		while (n_copy>10) {
-			n_copy/=10;
-			y*=10;
+		else{
+			throw new ArithmeticException ("Invalid value"); 
 		}
-		
-		int remainder, z = 1;							//enter the digits into the represented array
-		while (n>0) {
-			remainder = n%y;
-			this.digit_list[z]= ((n-remainder)/y);
-			y/=10;
-			n = remainder;
-			z++;
+	}
+	//constructors
+		public HugeInteger(String val) throws ArithmeticException {
+			
+
+			//first handle leading value_sign and remove it if it exists
+			String newval = "";
+			if(val.charAt(0) == '-') {
+				this.value_sign = false;
+				newval = val.substring(1); //new string without leading value_sign
+			}
+			else {
+				this.value_sign = true;
+				newval = val; //same string
+			}
+			
+			//then remove leading zeroes from newval
+			newval = newval.replaceFirst("^0+(?!$)", "");
+			
+			//now check if there are any illegal characters still in string
+			if(newval.matches("[0-9]+") == false) {
+				throw new ArithmeticException("There are characters other than 0 to 9");
+			}
+					
+			
+			//Trivial case if input "0" and "-0".
+			if(newval.matches("^[0]")) {
+				this.value_sign = true;
+			}
+			//these trivial cases handles 0 and -0 and 0000 and -0000
+			//by turning it all into "0", this.value_sign = false.
+			//then it goes through the constructor normally.
+			
+
+			
+			//now turn processed string into huge integer.
+			
+			//convert string to chars
+			char[] charArr = new char[newval.length()]; //initialize
+			newval.getChars(0, newval.length(), charArr, 0);
+			
+			//now we can copy our stuff to an int array.
+			this.intArr = new int[charArr.length]; //initialize
+			for(int i=0; i < charArr.length; i++) {
+				this.intArr[charArr.length-1-i] = charArr[i];
+			}
+			
+			
+			
+			//Notice that the numbers are still encoded,
+			//eg 0 -> 48, 1 -> 49 etc.
+			//shift everything down by 48.
+			for(int i=0; i < this.intArr.length; i++) {
+				this.intArr[i] = this.intArr[i] - 48;
+			}
+			
+			//now we have a sanitized HugeInteger in intArr.
+			//they are of type integer which means you can do
+			//arithmetic operations
+			
+			
 		}
+	public HugeInteger(int value, boolean sign, int digits) throws ArithmeticException {
 		
-		this.num_len = this.digit_list.length-1;		//update size of the list
+		//if less than 0 length
+		if(digits<0) {
+			throw new ArithmeticException("An integer can't have value_sign length, additional constructor");
+		}
+		else if(digits>100000) {
+			throw new ArithmeticException("That is like way too long, above 100000 digits in length, additional constructor");
+		}
+		else if(value<0) {
+			throw new ArithmeticException("Value can't be value_sign. Use the boolean for that, additional constructor");
+		}
+		else {
+			this.value_sign =sign;
+			
+			intArr = new int[digits];
+			Arrays.fill(intArr, value);
+		}
 	}
 	
-	public HugeInteger(String val) {
-		String array[] = val.split("");					//Split the string into array of strings
-		this.digit_list = new int [val.length()];
-		int x;											//find if the integer is positive or nevative 
-		if (array[0]=="-") {							//if it is negative
-			this.digit_list[0]=1;
-			x=1;
-		}
-		else {											//if it is positive
-			this.digit_list[0]=0;
-			x=0;
-		}
-		
-		for (int i=1; i<val.length(); i++, x++) {		//enter the digits into the represented array
-			this.digit_list[i]=val.charAt(x);
-		}
-		
-		this.num_len = this.digit_list.length-1;		//update size of the list
-	}
+
+	/*methods ----------------------------------------------*/
 	
 	public HugeInteger add(HugeInteger h) {
-		int x = 0;													//find the length of the sum array
-		int y = 0;
-		if(this.num_len == h.num_len) {								//if the numbers have the same number of digits
-			x = this.num_len + 1;
+		
+		//basically just use long addition with carry overs
+		//starting in ones place and going to millionths etc
+		
+		//what if this + h makes a bigger array?
+		//have the sum array be 1 bigger than the bigger of the two
+		//then make another final array, with no unwanted empty spaces. 
+		
+		//if none are value_sign
+		if(this.value_sign == true && h.value_sign == true) {
+			
+			//dont need to have cases for which one is bigger.
+			//just detect the size of the biggest, and make the sum
+			//array one bigger.
+			int arrMax = Math.max(this.intArr.length, h.intArr.length);
+			
+			//initialize a large sum array with allowance for overflow
+			HugeInteger sum = new HugeInteger(0,true,arrMax+1);
+
+			//This is positive only.
+			sum.value_sign = this.value_sign;
+			
+			
+			//copy this into sum
+			for(int i=0; i<this.intArr.length; i++) {
+				sum.intArr[i] = this.intArr[i];
+			}
+			
+			//now do long addition with h
+			int carry = 0;
+			for(int i=0; i<sum.intArr.length; i++) {
+				
+				int intSum = carry;
+				
+				if(i < this.intArr.length) {
+					intSum = intSum + this.intArr[i];
+				}
+				if(i < h.intArr.length) {
+					intSum = intSum + h.intArr[i];
+				}
+				
+								
+				if(intSum >= 10) {
+					carry = 1;
+				}
+				else {
+					carry = 0;
+				}
+				
+				int remainder = intSum % 10;
+				
+				sum.intArr[i] = remainder;
+			}
+			
+			
+			
+			//now copy to string
+			String output = new String();
+			for(int i=sum.intArr.length-1; i>=0; i--) {
+				output = output + sum.intArr[i];
+			}
+
+			//do leading zero removal 
+			output = output.replaceFirst("^0+(?!$)", "");
+			
+			//initialize a new final array
+			HugeInteger sanitized = new HugeInteger(0,true,output.length());
+			
+			//copy string into a final array.
+			//convert string to chars
+			char[] charArray = new char[output.length()]; //initialize
+			output.getChars(0, output.length(), charArray, 0);
+			
+			//now we can copy our stuff to an int array.
+			sanitized.intArr = new int[charArray.length]; //initialize
+			for(int i=0; i < charArray.length; i++) {
+				sanitized.intArr[charArray.length-1-i] = charArray[i];
+			}
+			
+			//Notice that the numbers are still ascii encoded,
+			//eg 0 -> 48, 1 -> 49 etc.
+			//shift everything down by 48.
+			for(int i=0; i < sanitized.intArr.length; i++) {
+				sanitized.intArr[i] = sanitized.intArr[i] - 48;
+			}
+			
+			
+			return sanitized;
 		}
-		else if (this.num_len > h.num_len) {						//if the value has more digit than h
-			x = this.num_len; 
-			y = 1;
+
+		//if this only is value_sign
+		else if(this.value_sign == true && h.value_sign == false){
+			; //deal with this in lab 2
+			//call subtract
+			return h;
 		}
-		else {														//if h has more digit than the value
-			x = h.num_len;
-			y = 2;
+		//if h only is value_sign
+		else if(this.value_sign == false && h.value_sign == true ){
+			; //deal with this in lab 2
+			//call subtract
+			return h;
 		}
 		
-		HugeInteger sum = new HugeInteger(0);						//initiate sum array
-		sum.num_len = x;
-		int z = 0;													//compare the sign between the numbers
-		int w = 0;
-		if (this.digit_list[0] == h.digit_list[0] ) {				//if they are the same sign
-			sum.digit_list[0] = this.digit_list[0];							//initiate the sign of sum
-			for(int i=x; i>1; i--) {
-				z = this.digit_list[i] + h.digit_list[i] + w;		//add two value at the same digit level and the remainder
-				if(z<=9) {											//if the sum is less than 10
-					sum.digit_list[i] = z;
-				}
-				else {												//if the sum is more than 10
-					sum.digit_list[i] = z - 10;
-					w = 1;
-				}
-			}
-		}
+		//if both are value_sign
 		else {
-			int []temp1 = {0};											//initiate the dummy array
-			int []temp2 = {0};											//initiate another dummy array
-			if(y == 0) {									        //this number is the same digit as h
-				for(int i=1; i<this.num_len; i++) {
-					if(this.digit_list[0] > h.digit_list[0]) {		//the absolute of this number is greater h
-						sum.digit_list[0]= this.digit_list[0];
-						temp1 = this.digit_list;
-						temp2 = h.digit_list;
-					}
-					else {											//the absolute of h is greater than this number
-						sum.digit_list[0]= h.digit_list[0];
-						temp1 = h.digit_list;
-						temp2 = this.digit_list;
-					}
-				}
-			}
-			else if (y==1 ) {										//this number is greater than h in length
-				sum.digit_list[0] = this.digit_list[0];
-				temp1 = this.digit_list;
-				temp2 = h.digit_list;
-			}
-			else {													//this number is smaller than h in length
-				sum.digit_list[0] = h.digit_list[0];
-				temp1 = h.digit_list;
-				temp2 = this.digit_list;
-			}
-			for(int i = x; i>1 ; i--) {
-				z = temp1[i] - temp2[i] - w;						//subtract two values at the same digit level and subtract the borrow 
-				if (z>=0) {											//if the value is positive
-					sum.digit_list[i] = z;
-				}
-				else {												//if the value is negative
-					sum.digit_list[i] = z + 10;
-					w = 1;
-				}
-			}
-		}
-		return sum;
-	}
-	public HugeInteger subtract(HugeInteger h) {
-		int x = 0;													//find the length of the sum array
-		int y = 0;
-		if(this.num_len == h.num_len) {								//if the numbers have the same number of digits
-			x = this.num_len + 1;
-		}
-		else if (this.num_len > h.num_len) {						//if the value has more digit than h
-			x = this.num_len; 
-			y = 1;
-		}
-		else {														//if h has more digit than the value
-			x = h.num_len;
-			y = 2;
+			; //deal with this in lab 2
+			//use positive addition for double value_signs.
+			//then just say value_sign = true.
+			return h;
 		}
 		
-		HugeInteger diff = new HugeInteger(0);						//initiate difference array
-		diff.num_len = x;
-		int z = 0;													//compare the sign between the numbers
-		int w = 0;
-		if (this.digit_list[0] != h.digit_list[0] ) {				//if they are the same are different
-			diff.digit_list[0] = this.digit_list[0];				//initiate the sign of sum
-			for(int i=x; i>1; i--) {
-				z = this.digit_list[i] + h.digit_list[i] + w;		//add two value at the same digit level and the remainder
-				if(z<=9) {											//if the sum is less than 10
-					diff.digit_list[i] = z;
-				}
-				else {												//if the sum is more than 10
-					diff.digit_list[i] = z - 10;
-					w = 1;
-				}
-			}
-		}
-		else {
-			int []temp1 = {0};											//initiate the dummy array
-			int []temp2 = {0};											//initiate another dummy array
-			if(y == 0) {									        //this number is the same digit as h
-				for(int i=1; i<this.num_len; i++) {
-					if(this.digit_list[0] > h.digit_list[0]) {		//the absolute of this number is greater h
-						diff.digit_list[0]= this.digit_list[0];
-						temp1 = this.digit_list;
-						temp2 = h.digit_list;
-					}
-					else {											//the absolute of h is greater than this number
-						diff.digit_list[0]= h.digit_list[0];
-						temp1 = h.digit_list;
-						temp2 = this.digit_list;
-					}
-				}
-			}
-			else if (y==1 ) {										//this number is greater than h in length
-				diff.digit_list[0] = this.digit_list[0];
-				temp1 = this.digit_list;
-				temp2 = h.digit_list;
-			}
-			else {													//this number is smaller than h in length
-				diff.digit_list[0] = h.digit_list[0];
-				temp1 = h.digit_list;
-				temp2 = this.digit_list;
-			}
-			for(int i = x; i>1 ; i--) {
-				z = temp1[i] - temp2[i] - w;						//subtract two values at the same digit level and subtract the borrow 
-				if (z>=0) {											//if the value is positive
-					diff.digit_list[i] = z;
-				}
-				else {												//if the value is negative
-					diff.digit_list[i] = z + 10;
-					w = 1;
-				}
-			}
-		}
-		return diff;
+
 	}
-	
-	public int compareTo(HugeInteger h){
-		if(this.digit_list[0] > h.digit_list[0]) {
-			return -1;
-		}
-		else if(this.digit_list[0] < h.digit_list[0]) {
-			return 1;
-		}
-		else if(this.digit_list[0]==0) {
-			if(this.num_len > h.num_len) {
-				return 1;
-			}
-			else if(this.num_len < h.num_len) {
-				return -1;
-			}
-			else {
-				for (int i = 1; i<this.num_len; i++) {
-					if(this.digit_list[i] > h.digit_list[i]) {
-						return 1;
-					}
-					if(this.digit_list[i] < h.digit_list[i]) {
-						return -1;
-					}
-				}
-				return 0;
-			}
-		}
-		else {
-			if(this.num_len > h.num_len) {
-				return -1;
-			}
-			else if(this.num_len < h.num_len) {
-				return 1;
-			}
-			else {
-				for (int i = 1; i<this.num_len; i++) {
-					if(this.digit_list[i] > h.digit_list[i]) {
-						return -1;
-					}
-					if(this.digit_list[i] < h.digit_list[i]) {
-						return 1;
-					}
-				}
-				return 0;
-			}
-		}
-	}
-	
+
 	public String toString(){
-		String output = new String(); 
-		if (this.digit_list[0] == 1){
+		String output = new String();
+		output = "";
+		if (this.value_sign == false){
 		    output = "-";
 		}
-        for (int i=1; i<this.num_len+1; i++) {
-        	output= output + this.digit_list[i];
+        for (int i=this.intArr.length-1; i>=0;i--) {
+        	output= output + this.intArr[i];
         }
 		return output;
-	}    
+	} 
+	public static void main(String [] arges) {
+		
+		String a = "-5000";
+		String b = "-0050";
+		String c = "50000";
+		String d = "00005";
+		
+
+		HugeInteger testa = new HugeInteger(a);
+		HugeInteger testb = new HugeInteger(b);
+		HugeInteger testc = new HugeInteger(c);
+		HugeInteger testd = new HugeInteger(d);
+
+		System.out.println(testa.toString());
+		System.out.println(testb.toString());
+		System.out.println(testc.toString());
+		System.out.println(testd.toString());
+		
+		HugeInteger add_cd = testc.add(testd);
+		System.out.println(add_cd.toString());
+		
+		String e = "hello";
+		HugeInteger teste = new HugeInteger(e);
+		System.out.println(teste.toString());
+		
+		int x = -1;
+		int y = 0 ;
+		int z = 5 ;
+		
+		HugeInteger testx = new HugeInteger(x);
+		HugeInteger testy = new HugeInteger(y);
+		HugeInteger testz = new HugeInteger(z);
+		
+		System.out.println(testx.toString());
+		System.out.println(testy.toString());
+		System.out.println(testz.toString());
+	}
 }
 

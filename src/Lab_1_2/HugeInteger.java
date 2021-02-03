@@ -118,9 +118,6 @@ public class HugeInteger {
 		}
 	}
 	
-
-	/*methods ----------------------------------------------*/
-	
 	public HugeInteger add(HugeInteger h) {
 		
 		//basically just use long addition with carry overs
@@ -235,7 +232,7 @@ public class HugeInteger {
 		
 
 	}
-
+//test cases
 	public String toString(){
 		String output = new String();
 		output = "";

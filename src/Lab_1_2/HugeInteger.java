@@ -22,7 +22,6 @@ public class HugeInteger {
 					this.value_sign = 'n';
 				}
 				
-				
 				double x = Math.random();										// generate leading entry
 				while(x == 0) {
 					x = Math.random();
@@ -60,7 +59,7 @@ public class HugeInteger {
 			if(newval.matches("^[0]")) {										//Trivial case if input "0" and "-0".
 				this.value_sign = 'p';
 			}
-			
+		
 			this.digit_list = new int[newval.length()];							//now we can copy our stuff to an int array.
 			for(int i=0; i < newval.length(); i++) {
 				this.digit_list[newval.length()-1-i] = newval.charAt(i)-48;		//insert number into the corresponding place
@@ -70,6 +69,7 @@ public class HugeInteger {
 			}
 				
 		}
+//////////additional constructor to help with addition 
 	public HugeInteger(char sign, int digits) throws ArithmeticException {
 		
 		if(digits<0) {															//if less than 0 length
@@ -93,7 +93,7 @@ public class HugeInteger {
 
 		if(this.value_sign == h.value_sign) {									//when both number is same sign
 			
-			sum.value_sign = this.value_sign;									//the sign should be the same as other number and be positive									
+			sum.value_sign = h.value_sign;									//the sign should be the same as other number and be positive									
 			
 			//now do long addition with h
 			int carry_out = 0;
@@ -109,6 +109,7 @@ public class HugeInteger {
 				}
 								
 				if(index_sum >= 10) {
+					index_sum = index_sum-10;
 					carry_out = 1;
 				}
 				else {
@@ -176,7 +177,13 @@ public class HugeInteger {
 					index_sum = index_sum - small.digit_list[i];
 				}
 				else {
-					carry_out = 0;
+					if(index_sum<0) {
+						index_sum += 10;
+						carry_out = -1;
+					}
+					else {
+						carry_out = 0;
+					}
 				}
 				sum.digit_list[i]= index_sum;
 			}
@@ -186,13 +193,17 @@ public class HugeInteger {
 		for(int i=sum.digit_list.length-1; i>=0; i--) {
 			output = output + sum.digit_list[i];
 		}
-
+		
 		output = output.replaceFirst("^0+(?!$)", "");							//remove leading zeros
 		
 		HugeInteger actual_sum = new HugeInteger('p',output.length());			//int a new array to store the final sum array
 		actual_sum.value_sign = sum.value_sign;									//assign array's sign
 		
-		
+		//Trivial case if input "0" and "-0".
+		if(output.matches("^[0]")) {
+			actual_sum.value_sign = 'p';
+		}
+				
 		actual_sum.digit_list = new int[output.length()]; 						//copy integer to the array
 		for(int i=0; i < output.length(); i++) {
 			actual_sum.digit_list[output.length()-1-i] = output.charAt(i)-48;
@@ -204,12 +215,12 @@ public class HugeInteger {
 
 //////////////////////////////////////////////////////sub
 	
-	public HugeInteger sub(HugeInteger h) {
+	public HugeInteger subtract(HugeInteger h) {
 		
 		int diff_len = Math.max(this.digit_list.length, h.digit_list.length); 	//make a new array using the one have bigger length
 		HugeInteger diff = new HugeInteger('p',diff_len+1);						//initialize a large sum array with allowance for overflow
 
-		if(this.value_sign != h.value_sign) {									//when both number is same sign
+		if(this.value_sign != h.value_sign) {									//when both number is different sign
 			
 			diff.value_sign = this.value_sign;									//the sign should be the same as other number and be positive									
 			
@@ -217,29 +228,34 @@ public class HugeInteger {
 			int carry_out = 0;
 			for(int i=0; i<diff.digit_list.length; i++) {
 				
-				int index_sum = carry_out;
+				int index_diff = carry_out;
 				
 				if(i < this.digit_list.length) {
-					index_sum = index_sum + this.digit_list[i];
+					index_diff = index_diff + this.digit_list[i];
 				}
 				if(i < h.digit_list.length) {
-					index_sum = index_sum + h.digit_list[i];
+					index_diff = index_diff + h.digit_list[i];
 				}
 								
-				if(index_sum >= 10) {
+				if(index_diff >= 10) {
 					carry_out = 1;
 				}
 				else {
-					carry_out = 0;
+					if(index_diff<0) {
+						index_diff += 10;
+						carry_out = -1;
+					}
+					else {
+						carry_out = 0;
+					}
 				}
 				
-				int remainder = index_sum % 10;
+				int remainder = index_diff % 10;
 				diff.digit_list[i] = remainder;
 			}
 		}
 
-		//if this only is value_sign
-		else {
+		else {																	//same sign
 			
 			HugeInteger big = new HugeInteger('p', 1);							//place holder for bigger absolute number 
 			HugeInteger small = new HugeInteger('p', 1);						//					smaller absolute number
@@ -247,10 +263,17 @@ public class HugeInteger {
 			if(this.digit_list.length>h.digit_list.length) {
 				big = this;
 				small = h;
+				diff.value_sign = big.value_sign;								//the sign should be the same as other number 								
 			}
 			else if(h.digit_list.length>this.digit_list.length) {
 				big = h;
 				small = this;
+				if(h.value_sign == 'n') {
+					diff.value_sign = 'p';										//the sign should be the opposite as other numbers and be positive									
+				}
+				else {
+					diff.value_sign ='n';
+				}
 			}
 			else {
 				int i=0;
@@ -258,20 +281,27 @@ public class HugeInteger {
 					if(this.digit_list[i-1]>h.digit_list[i-1]) {
 						big = this;
 						small = h;
+						diff.value_sign = big.value_sign;						//the sign should be the same as other number 				
 						break;
 					}
 					if(this.digit_list[i-1]<h.digit_list[i-1]) {
 						big = h;
 						small = this;
+						if(h.value_sign == 'n') {
+							diff.value_sign = 'p';										//the sign should be the opposite as other numbers and be positive									
+						}
+						else {
+							diff.value_sign ='n';
+						}
 						break;
 					}
 				}
 				if(i==0) {
 					big = h;
 					small = h;
+					diff.value_sign = 'p';										//the sign should be positive				
 				}
 			}
-			diff.value_sign = big.value_sign;									//the sign should be the same as other number and be positive									
 			
 			//now do long addition with h
 			int carry_out = 0;
@@ -294,7 +324,13 @@ public class HugeInteger {
 					index_diff = index_diff - small.digit_list[i];
 				}
 				else {
-					carry_out = 0;
+					if(index_diff<0) {
+						index_diff += 10;
+						carry_out = -1;
+					}
+					else {
+						carry_out = 0;
+					}
 				}
 				diff.digit_list[i]= index_diff;
 			}
@@ -304,8 +340,13 @@ public class HugeInteger {
 		for(int i=diff.digit_list.length-1; i>=0; i--) {
 			output = output + diff.digit_list[i];
 		}
-
+		
 		output = output.replaceFirst("^0+(?!$)", "");							//remove leading zeros
+		
+		//Trivial case if input "0" and "-0".
+		if(output.matches("^[0]")) {
+			diff.value_sign = 'p';
+		}
 		
 		HugeInteger actual_diff = new HugeInteger('p',output.length());			//int a new array to store the final sum array
 		actual_diff.value_sign = diff.value_sign;								//assign array's sign
@@ -337,7 +378,7 @@ public class HugeInteger {
 			return -1;
 		}
 		else {
-			for (int i = this.digit_list.length-1; i>0 ; i--) {
+			for (int i = this.digit_list.length-1; i>=0 ; i--) {
 				if(this.digit_list[i] > h.digit_list[i]) {
 					return 1;
 				}
@@ -356,7 +397,7 @@ public class HugeInteger {
 			return 1;
 		}
 		else {
-			for (int i = 1; i<this.digit_list.length; i++) {
+			for (int i=this.digit_list.length-1; i>=0; i--) {
 				if(this.digit_list[i] > h.digit_list[i]) {
 					return -1;
 				}
@@ -368,7 +409,167 @@ public class HugeInteger {
 		}
 	}
 }
+//////multiply length under
+	
+public HugeInteger multiply_under10(HugeInteger h) {
+	HugeInteger mul = new HugeInteger('p',this.digit_list.length+h.digit_list.length);
+	
+	int track=0;
+	
+	for(int i=0; i<this.digit_list.length; i++, track++) {
+		int carry_over = 0;
+		HugeInteger sub_mul = new HugeInteger('p',track + h.digit_list.length+1);
+		for(int j=0; j<h.digit_list.length+1; j++) {
+			int index_mul = carry_over;
+			if(j<h.digit_list.length) {
+				index_mul += (this.digit_list[i] * h.digit_list[j]);
+			}
+			if(index_mul>=10) {
+				carry_over = (index_mul-(index_mul%10))/10;
+			}
+			else {
+				carry_over = 0;
+			}
+			sub_mul.digit_list[track+j] = index_mul%10;
+		}
+		mul = mul.add(sub_mul);
+	}
+	
+	String output = new String();											//copy the sum array to output array to turn it into wanted number
+	for(int i=mul.digit_list.length-1; i>=0; i--) {
+		output = output +mul.digit_list[i];
+	}
+	
+	output = output.replaceFirst("^0+(?!$)", "");							//remove leading zeros
+	
+	if(h.value_sign == this.value_sign) {
+		mul.value_sign = 'p';
+	}
+	else {
+		mul.value_sign = 'n';
+	}
+	HugeInteger actual_mul= new HugeInteger('p',output.length());			//int a new array to store the final sum array
+	actual_mul.value_sign = mul.value_sign;								//assign array's sign
+	
+	
+	actual_mul.digit_list = new int[output.length()]; 						//copy integer to the array
+	for(int i=0; i < output.length(); i++) {
+		actual_mul.digit_list[output.length()-1-i] = output.charAt(i)-48;
+	}
 
+	return actual_mul; //long multiplication
+	
+}
+	
+	
+/////////////////////////////////////////////////////multiply
+
+public HugeInteger multiply(HugeInteger h){
+	
+	if(h.digit_list.length == 1 && h.digit_list[0] == 0) {
+		HugeInteger value_l1 = new HugeInteger('p',1);	
+		return value_l1;
+	}
+	
+	if(this.digit_list.length == 1 &&  this.digit_list[0] == 0) {
+		HugeInteger value_l1 = new HugeInteger('p',1);
+		return value_l1;
+	}
+	
+	int M = Math.max(h.digit_list.length, this.digit_list.length);
+	if(h.digit_list.length<10 || this.digit_list.length<10) {
+		
+		return this.multiply_under10(h); //long multiplication
+	}
+	
+	int N = (M/2) + (M%2);
+
+	//Initiate each calculation term for Karatsuba method
+	
+	
+	if(this.digit_list.length-N<0 || h.digit_list.length-N<0) {
+		return this.multiply_under10(h); //long multiplycation
+	}
+	
+	HugeInteger b = new HugeInteger(this.value_sign,this.digit_list.length-N);
+	for(int i = 0; i<b.digit_list.length; i++) {
+		b.digit_list[i] = this.digit_list[N+i];
+	}	
+	
+	HugeInteger a_raw = new HugeInteger(this.value_sign,N+1);
+	for(int i = 0; i<N; i++) {
+		a_raw.digit_list[i] = this.digit_list[i];
+	}
+	
+	HugeInteger d = new HugeInteger(h.value_sign,h.digit_list.length-N);
+	for(int i = 0; i<d.digit_list.length; i++) {
+		d.digit_list[i] = h.digit_list[N+i];
+	}
+	
+	HugeInteger c_raw = new HugeInteger(h.value_sign,N+1);
+	for(int i = 0; i<N; i++) {
+		c_raw.digit_list[i] = h.digit_list[i];
+	}
+
+	//get ride of leading zeros in a
+	String output1 = new String();											//copy the sum array to output array to turn it into wanted number
+	for(int i=a_raw.digit_list.length-1; i>=0; i--) {
+		output1 = output1 +a_raw.digit_list[i];
+	}
+	
+	output1 = output1.replaceFirst("^0+(?!$)", "");							//remove leading zeros
+	
+	HugeInteger a = new HugeInteger(a_raw.value_sign,output1.length());	
+	
+	a.digit_list = new int[output1.length()]; 						//copy integer to the array
+	for(int i=0; i < output1.length(); i++) {
+		a.digit_list[output1.length()-1-i] = output1.charAt(i)-48;
+	}
+
+	
+	//get_rid off leading 0s in c
+	String output2 = new String();											//copy the sum array to output array to turn it into wanted number
+	for(int i=c_raw.digit_list.length-1; i>=0; i--) {
+		output2 = output2 +c_raw.digit_list[i];
+	}
+	
+	output2 = output2.replaceFirst("^0+(?!$)", "");							//remove leading zeros
+	
+	HugeInteger c= new HugeInteger(c_raw.value_sign,output2.length());	
+	
+	c.digit_list = new int[output2.length()]; 						//copy integer to the array
+	for(int i=0; i < output2.length(); i++) {
+		c.digit_list[output2.length()-1-i] = output2.charAt(i)-48;
+	}
+
+	
+	//calculate 1st term
+	HugeInteger z0 = a.multiply(c);
+	
+	//calculate 3rd term
+	HugeInteger z2 = b.multiply(d);
+	
+	//calculate 2nd term
+	HugeInteger z1_sub3 = (a.add(b)).multiply(c.add(d));
+	HugeInteger z1 = (z1_sub3.subtract(z0)).subtract(z2);
+	
+	//times by 10^N
+	HugeInteger z1_term = new HugeInteger(z1.value_sign,z1.digit_list.length+N);
+	for(int i = 0; i<z1.digit_list.length; i++) {
+		z1_term.digit_list[N+i] = z1.digit_list[i];
+	}
+	
+	//times by 10^(N*2)
+	HugeInteger z2_term = new HugeInteger(z2.value_sign,z2.digit_list.length+(N*2));
+	for(int i = 0; i<z2.digit_list.length; i++){
+		z2_term.digit_list[N*2+i]=z2.digit_list[i];
+	}
+	
+	//add all terms
+	HugeInteger z = (z0.add(z1_term)).add(z2_term);
+	//HugeInteger z = d;
+	return z;
+}
 
 /////////////////////////////////////////////////////to string	
 	public String toString(){
@@ -386,41 +587,44 @@ public class HugeInteger {
 	//test case
 	public static void main(String [] arges) {
 		
-		String a = "56700";
-		String b = "-56700";
-		String c = "-6700";
-		String d = "999";		
-
+		String a = "100";
+		String b = "-90";
+		String  d= "2322123232";
+		String c ="-2032334563298332";		
+								//1928
 		HugeInteger testa = new HugeInteger(a);
 		HugeInteger testb = new HugeInteger(b);
 		HugeInteger testc = new HugeInteger(c);
 		HugeInteger testd = new HugeInteger(d);
 
-		System.out.println(testa.toString());
-		System.out.println(testb.toString());
-		System.out.println(testc.toString());
-		System.out.println(testd.toString());
+		//System.out.println(testa.toString());
+		//System.out.println(testb.toString());
+		//System.out.println(testc.toString());
+		//System.out.println(testd.toString());
 		
-		HugeInteger add_bd = testa.sub(testd);
-		System.out.println(add_bd.toString());
+		HugeInteger add_ab = testc.add(testd);
+		//System.out.println(add_ab.toString());
 		
-		HugeInteger add_bc = testc.sub(testd);
-		System.out.println(add_bc.toString());
+		HugeInteger mul_cd = testd.multiply(testc);
+		System.out.println(mul_cd.toString());
+		
+		HugeInteger mul_cd_true = testd.multiply_under10(testc);
+		System.out.println(mul_cd_true.toString());
 		
 		int x = 5;
 		HugeInteger testx = new HugeInteger(x);
-		System.out.println(testx.toString());
+		//System.out.println(testx.toString());
 		
 		String e = "hello";
 		HugeInteger teste = new HugeInteger(e);
-		System.out.println(teste.toString());
+		//System.out.println(teste.toString());
 		
 		int y = 0 ;
 		HugeInteger testy = new HugeInteger(y);
-		System.out.println(testy.toString());
+		//System.out.println(testy.toString());
 		
 		int z = -1 ;
 		HugeInteger testz = new HugeInteger(z);
-		System.out.println(testz.toString());
+		//System.out.println(testz.toString());
 	}
 }

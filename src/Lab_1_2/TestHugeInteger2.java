@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.mycompany.lab2_21;
+package Lab_1_2;
 
 import java.math.BigInteger;
 import java.util.Random;
@@ -13,7 +13,7 @@ import java.util.Random;
  * @author Ming Chen, Han Zhang, Mehrshad Kafi
  * 
  */
-public class TestHugeInteger {
+public class TestHugeInteger2 {
     // if your terminal support to print color in console, use:
 //    public static final String ANSI_RESET = "\u001B[0m";
 //    public static final String ANSI_BLACK = "\u001B[30m";
@@ -38,7 +38,7 @@ public class TestHugeInteger {
     // when test failed, the size of number <= NUM_DISPLAY, display the number
     public static final int NUM_DISPLAY = 1000;
     // iterate the MAX_SIZE_ARRAY MAX_RUN times
-    public static final int MAX_RUN = 50;
+    public static final int MAX_RUN = 20; //used to be 50
     // use for generating invalid string for constructor 1 (with string input)
     public static final int MAX_INVALID_STRING = 5;
     // different size for test
@@ -1619,7 +1619,7 @@ public class TestHugeInteger {
                 x3 = x1.add(x2);                
             }else{
                 y3 = y1.subtract(y2);
-                x3 = x1.subtract(x2);                
+                x3 = x1.subtract(x2);              
             }
 
             if(!(y3.toString().equals(x3.toString()))){
@@ -1697,7 +1697,7 @@ public class TestHugeInteger {
      * @param number2 second number
      * @param msg display message
      * @return the number of failed test cases
-     */    
+        */
     public static int testMultiplicationExd(String number1, String number2, String msg){
         HugeInteger x1;
         HugeInteger x2;
@@ -1739,8 +1739,8 @@ public class TestHugeInteger {
         }       
         return failNum;
     }
-    
-    /**
+ 
+     /**
      * @param size the size of the number 
      * @return the string of the number
      */     

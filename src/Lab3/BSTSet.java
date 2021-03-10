@@ -12,11 +12,11 @@ public class BSTSet{
 	public int[] Sort(int[] input) {
 		//sort descending array staring from the root
 		int l = input.length;
-		for(int current = 1; current<l; ++current) {			//sort starting from the second value of the array because the 1 index is the root 
-			int temp = input[current];
-			int previous = current-1;
+		for(int current = 1; current<l; ++current) {					//sort starting from the second value of the array because the 1 index is the root 
+			int temp = input[current];									//Initiate temp to hold the input value of the current index
+			int previous = current-1;									//Initiate previous to hold the previous index value
 			
-			while(previous >= 0 && input[previous] > temp) {					//while the previous input is greater then the current input in the list
+			while(previous >= 0 && input[previous] > temp) {			//while the previous input is greater then the current input in the list
 				input[previous + 1] = input[previous];					//the previous input is being shift to the next index
 				previous=previous-1;									//the previous index update to the next index
 			}
@@ -53,9 +53,9 @@ public class BSTSet{
 		}
 		//Make median index of the array to become the root and add child to it through recursive
 		int median = (s+e)/2;
-		TNode new_node = new TNode(input[median],null, null);				//start from the median and insert the value into the node
-		new_node.left = generator(input, s, median - 1);					//use recursive for the left child
-		new_node.right = generator(input, median + 1, e);					//use recursive for the right child
+		TNode new_node = new TNode(input[median],null, null);			//start from the median and insert the value into the node
+		new_node.left = generator(input, s, median - 1);				//use recursive for the left child
+		new_node.right = generator(input, median + 1, e);				//use recursive for the right child
 		return new_node;
 	}
 	
@@ -81,20 +81,20 @@ public class BSTSet{
 			return true;
 		}
 		//Recursive true if either the left or the right node matches
-		boolean left = compare(node.left, v);	//check the left side 1st
+		boolean left = compare(node.left, v);					//check the left side 1st
 		if(left == true){
-			return true;						//return true if matches v 
+			return true;										//return true if matches v 
 		}
-		boolean right = compare(node.right, v);	//check the right side 2nd
-		return right;						//return true if matches v	
+		boolean right = compare(node.right, v);					//check the right side 2nd
+		return right;											//return true if matches v	
 	}
 	
 	//Check if integer v is in the Tree list
 	public boolean isIn(int v) {
-		if (root == null) {						//return false if the node is null
+		if (root == null) {										//return false if the node is null
 			return false;
 		}
-		return (compare(root, v));				//the compare recursive method to check if the value v is in the Tree or not
+		return (compare(root, v));								//the compare recursive method to check if the value v is in the Tree or not
 	}
 		
 //2)
@@ -257,7 +257,7 @@ public class BSTSet{
 	//function used to find height of the Tree using recursive
 	public int total_height(TNode node) {
 
-		if (node == null) {									//if there is no height, return -1
+		if (node == null) {								//if there is no height, return -1
 			return -1;
 		} else {
 			int left_h = total_height(node.left);		//keep calling recursive height until hit null 1+1+...+1+(-1) on the left size
@@ -296,13 +296,53 @@ public class BSTSet{
 	}
 	
 //9)b)
+	//Use Mystack to print the tree in descending-order 
 	public void printNonRec() {
+		System.out.print("Elements are: ");		// Structure to prints the integers in this BSTSet in increasing order.  	
+		MyStack stack = new MyStack;			//create an empty stack array
+		TNode node = root;						//create a new root
+		//Create an infinite while loop to go through the tree
+		while(true) {
+			while(node != null) {				//while the node is not empty
+				stack.push(node);				//call stack to push the value of the node into the stack array
+				node = node.left;				//move downward to the left node
+			}
+		}
 		
+		if(stack.IsEmpty()){					//if the stack array is empty, break
+			break;								//stop the while loop
+		}
+		
+		node=stack.pop(); 						//go back to the parent node
+		
+		System.out.print(node.element + ", " );	//print the elements of the node
+		node=node.right; 						//move to the right side of the node after finishing printing the element
 	}
-
 //10)
+	//use MyQueue class to print the tree in the level order
 	public void printLevelOrder() {
+		TNode new_node = root;									//initiate a node type.
 		
+		if(new_node!= null) {									//when the root has values
+			System.out.print("Elements are: ");					//structure to prints the integers in this BSTSet in tree level order.
+			MyQueue queue = new MyQueue();						//create an empty queue array
+			//a while loop to go tree array and make sure it is empty
+			while(!queue.IsEmpty()) {
+				TNode node = queue.dequeue();					//dequeue a node
+				System.out.print(node.element + ", ");			//print out the dequeue node
+				
+				if (node.right != null) {						//check the right node if it is holding a value
+					queue.enqueue(node.right);					//move the right node to become the check node
+				}
+				
+				if (node.left != null) {						//check the left node if it is holding a value
+					queue.enqueue(node.left);					//move the left node to become the check node
+				}
+			}
+		}
+		else {													//if the tree is empty
+			System.out.print("Binary tree is empty"); 			//Print a line to indicate there is nothing in the tree
+		}
 	}
 	
 // Get root

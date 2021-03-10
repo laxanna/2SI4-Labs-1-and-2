@@ -299,7 +299,7 @@ public class BSTSet{
 	//Use Mystack to print the tree in descending-order 
 	public void printNonRec() {
 		System.out.print("Elements are: ");		// Structure to prints the integers in this BSTSet in increasing order.  	
-		MyStack stack = new MyStack;			//create an empty stack array
+		Mystack stack = new Mystack();			//create an empty stack array
 		TNode node = root;						//create a new root
 		//Create an infinite while loop to go through the tree
 		while(true) {
@@ -307,16 +307,14 @@ public class BSTSet{
 				stack.push(node);				//call stack to push the value of the node into the stack array
 				node = node.left;				//move downward to the left node
 			}
-		}
 		
-		if(stack.IsEmpty()){					//if the stack array is empty, break
-			break;								//stop the while loop
-		}
-		
-		node=stack.pop(); 						//go back to the parent node
-		
+			if(stack.isEmpty()){					//if the stack array is empty, break
+				break;								//stop the while loop
+			}
+		node= (TNode)stack.pop(); 						//go back to the parent node
 		System.out.print(node.element + ", " );	//print the elements of the node
 		node=node.right; 						//move to the right side of the node after finishing printing the element
+		}
 	}
 //10)
 	//use MyQueue class to print the tree in the level order
@@ -327,7 +325,7 @@ public class BSTSet{
 			System.out.print("Elements are: ");					//structure to prints the integers in this BSTSet in tree level order.
 			MyQueue queue = new MyQueue();						//create an empty queue array
 			//a while loop to go tree array and make sure it is empty
-			while(!queue.IsEmpty()) {
+			while(queue.IsEmpty()) {
 				TNode node = queue.dequeue();					//dequeue a node
 				System.out.print(node.element + ", ");			//print out the dequeue node
 				
